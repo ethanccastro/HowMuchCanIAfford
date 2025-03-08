@@ -5,7 +5,7 @@ addEventListener('fetch', event => {
   async function handleRequest(request) {
     try {
       // Fetch the index.html file
-      const html = await fetch(new URL('index.html', import.meta.url));
+      const html = await fetch(new URL('./index.html', import.meta.url));
       if (!html.ok) {
           throw new Error("Could not fetch index.html");
       }
