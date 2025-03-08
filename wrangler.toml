@@ -2,7 +2,7 @@ name = "howmuchcaniafford"
 type = "javascript"
 account_id = "f85dcef8e00083ac98e90de31e4dc827"
 zone_id = "b40b0cb3a082d5f1b6d0e948ebe1d08d"
-main = "index.js"
+main = "worker.js"
 compatibility_date = "2025-03-08"
 workers_dev = false
 
