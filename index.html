@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>How Much Can I Afford?</title>
+      <style>
+         body {
+         font-family: "Wintle Text", Helvetica, "Helvetica Neue", Arial, sans-serif;
+         margin: 0;
+         padding: 0;
+         background-color: #fff;
+         color: #333;
+         letter-spacing: .02em;
+         }
+         .container {
+         max-width: 800px;
+         margin: 20px auto;
+         padding: 20px;
+         }
+         .container > .calculations {
+         margin-bottom: 20px;
+         display: block;
+         }
+         h1 {
+         text-align: center;
+         margin-bottom: 20px;
+         }
+         label {
+         display: block;
+         margin: 8px 0;
+         font-weight: 600;
+         }
+         input, select {
+         width: calc(100% - 22px);
+         padding: 10px;
+         border: 1px solid #ddd;
+         border-radius: 20px;
+         box-sizing: border-box;
+         font-size: 16px;
+         }
+         button {
+         background-color: black;
+         color: white;
+         padding: 12px 20px;
+         margin-top: 20px;
+         border: none;
+         border-radius: 20px;
+         cursor: pointer;
+         font-size: 16px;
+         width: calc(100% - 22px);
+         transition: background-color 0.3s ease;
+         }
+         button:hover {
+         background-color: #0056b3;
+         }
+         #results {
+         margin-top: 20px;
+         padding: 15px;
+         border: 1px solid #eee;
+         border-radius: 20px;
+         background-color: #D2D9F4;
+         }
+         #calculator-select {
+         margin-bottom: 20px;
+         }		
+         .calculations {
+         margin-bottom: 20px;
+         display: none;
+         background-color: #f4f5f7;
+         border-radius: 20px;
+         padding: 10px;
+         } 
+         @media (max-width: 600px) {
+         .container {
+         padding: 10px;
+         }
+         }
+      </style>
+   </head>
+   <body onload="calculatePay()">
+      <div class="container">
+         <header>
+            <h1>How Much Can I Afford?</h1>
+         </header>
+         <div class="calculations" id="paycheck-inputs">
+            <header>
+               <h2>My pay</h2>
+            </header>
+            <label for="state">State:</label>
+            <select id="state">
+               <option value="CA">California</option>
+               <option value="NY">New York</option>
+               <option value="TX">Texas</option>
+               <option value="FL">Florida</option>
+            </select>
+            <label for="salary">Salary amount:</label>
+            <input type="number" id="salary" oninput="calculatePay()" placeholder="Enter annual salary" value=20>
+            <label for="hourly">Per:</label>
+            <select id="salary-select" onchange="calculatePay()">
+               <option value="hour">Hour</option>
+               <option value="year">Year</option>
+            </select>
+            <label for="hours">Hours per week:</label>
+            <input type="number" id="hours" oninput="calculatePay()" placeholder="Enter hours per week" value=40>
+         </div>
+         <div class="calculations">
+            <header>
+               <h2>Calculator</h2>
+            </header>
+            <select id="calculator-select" onchange="toggleCalculator()">
+               <option value="mortgage">Mortgage Calculator</option>
+               <option value="auto">Auto Loan Calculator</option>
+            </select>
+            <div id="mortgage-inputs">		
+               <label for="homeValue">Home Value:</label>
+               <input type="number" id="homeValue" placeholder="Enter home value">
+               <label for="mortgageDownPayment">Down Payment:</label>
+               <input type="number" id="mortgageDownPayment" placeholder="Enter down payment">
+               <label for="interestRate">Interest Rate (%):</label>
+               <input type="number" id="interestRate" placeholder="Enter interest rate">
+               <label for="loanTerm">Loan Term (Years):</label>
+               <input type="number" id="loanTerm" placeholder="Enter loan term">
+               <button onclick="calculateMortgage()">Calculate Mortgage</button>
+            </div>
+            <div id="auto-inputs">
+               <label for="vehiclePrice">Vehicle Price:</label>
+               <input type="number" id="vehiclePrice" placeholder="Enter vehicle price">
+               <label for="autoDownPayment">Down Payment:</label>
+               <input type="number" id="autoDownPayment" placeholder="Enter down payment">
+               <label for="autoInterestRate">Interest Rate (%):</label>
+               <input type="number" id="autoInterestRate" placeholder="Enter interest rate">
+               <label for="autoLoanTerm">Loan Term (Months):</label>
+               <input type="number" id="autoLoanTerm" placeholder="Enter loan term">
+               <button onclick="calculateAutoLoan()">Calculate Auto Loan</button>
+            </div>
+         </div>
+         <div class="results-container" id="results"></div>
+      </div>
+      <script>
+         var monthlySalary;
+         var monthlyNet;
+            var monthlyPayment;
+         
+            function toggleCalculator() {
+              const selectedCalculator = document.getElementById("calculator-select").value;
+              document.getElementById("mortgage-inputs").style.display = selectedCalculator === "mortgage" ? "block" : "none";
+              document.getElementById("auto-inputs").style.display = selectedCalculator === "auto" ? "block" : "none";
+              document.getElementById("results").innerHTML = "";
+           calculatePay();
+            }
+         
+            toggleCalculator();
+         
+            function calculatePay() {
+              let state = document.getElementById("state").value;
+              let salary = parseFloat(document.getElementById("salary").value);	  
+              let hours = parseFloat(document.getElementById("hours").value);
+              let annualGross, weeklyGross, biweeklyGross, monthlyGross;
+           let salary_select = document.getElementById("salary-select").options[document.getElementById("salary-select").selectedIndex].value
+           
+         
+              if (salary_select == 'year') {
+                annualGross = salary;
+                weeklyGross = annualGross / 52;
+                biweeklyGross = weeklyGross * 2;
+                monthlyGross = annualGross / 12;
+              } else if (salary_select == 'hour' && hours) {
+                weeklyGross = salary * hours;
+                annualGross = weeklyGross * 52;
+                biweeklyGross = weeklyGross * 2;
+                monthlyGross = annualGross / 12;
+              }
+         
+              let federalTaxes = calculateFederalTaxes(annualGross);
+              let stateTaxes = calculateStateTaxes(annualGross, state);
+         
+              let socialSecurity = annualGross * 0.062;
+              let medicare = annualGross * 0.0145;
+         
+              let totalTaxes = federalTaxes + stateTaxes + socialSecurity + medicare;
+         
+              let weeklyNet = (weeklyGross - (totalTaxes / 52)).toFixed(2);
+              let biweeklyNet = (biweeklyGross - (totalTaxes / 26)).toFixed(2);
+              monthlyNet = (monthlyGross - (totalTaxes / 12)).toFixed(2);
+         
+              let resultsPayHTML = `                
+                <p><strong>Weekly Net Pay:</strong> $${weeklyNet}</p>
+                <p><strong>Biweekly Net Pay:</strong> $${biweeklyNet}</p>
+                <p><strong>Monthly Net Pay:</strong> $${monthlyNet}</p>
+              `;
+           
+           if (isNaN(monthlyNet)) {
+         	monthlyNet = 0;
+           }
+           document.getElementById("results").innerHTML =  `<p><strong>Monthly Net Pay:</strong> $${monthlyNet}</p>`;
+         monthlySalary = document.getElementById("results").innerHTML;
+           }
+         
+            function calculateFederalTaxes(annualGross) {
+              // Very basic example. For real tax calculations, use tax brackets and deductions.
+              if (annualGross <= 10000) {
+                return annualGross * 0.10;
+              } else if (annualGross <= 40000) {
+                return 1000 + (annualGross - 10000) * 0.12;
+              } else {
+                return 4600 + (annualGross - 40000) * 0.22;
+              }
+            }
+         
+            function calculateStateTaxes(annualGross, state) {
+              // Very basic examples. For real tax calculations, use tax brackets and deductions.
+              if (state === "CA") {
+                return annualGross * 0.08; // Example California rate
+              } else if (state === "NY") {
+                return annualGross * 0.06; // Example New York rate
+              } else if (state === "TX") {
+                return 0; // Texas has no state income tax
+              } else if (state === "FL") {
+                return 0; // Florida has no state income tax
+              } else {
+                return 0; // Default to 0 for unknown states
+              }
+            }
+         
+            function calculateMortgage() {
+              const homeValue = parseFloat(document.getElementById("homeValue").value);
+              const downPayment = parseFloat(document.getElementById("mortgageDownPayment").value); // Changed id to mortgageDownPayment
+              const interestRate = parseFloat(document.getElementById("interestRate").value) / 100 / 12;
+              const loanTerm = parseFloat(document.getElementById("loanTerm").value) * 12;
+         
+              const loanAmount = homeValue - downPayment;
+         
+              if (interestRate === 0) {
+                monthlyPayment = loanAmount / loanTerm;
+              } else {
+                monthlyPayment = (loanAmount * interestRate * Math.pow(1 + interestRate, loanTerm)) / (Math.pow(1 + interestRate, loanTerm) - 1);
+              }
+           
+           	  if (isNaN(monthlyPayment)) {
+         	monthlyPayment = 0;
+           }
+         
+         
+              const resultsHTML = `<p><strong>Monthly Mortgage Payment:</strong> $${monthlyPayment.toFixed(2)}</p>`;
+              document.getElementById("results").innerHTML = `${monthlySalary}\n${resultsHTML}\n<p><strong>Total: </strong> $${(monthlyNet - monthlyPayment).toFixed(2)}</p>`;
+            }
+         
+            function calculateAutoLoan() {
+              const vehiclePrice = parseFloat(document.getElementById("vehiclePrice").value);
+              const downPayment = parseFloat(document.getElementById("autoDownPayment").value); // Changed id to autoDownPayment
+              const interestRate = parseFloat(document.getElementById("autoInterestRate").value) / 100 / 12;
+              const loanTerm = parseFloat(document.getElementById("autoLoanTerm").value);
+         
+              const loanAmount = vehiclePrice - downPayment;
+         
+              if (interestRate === 0) {
+                monthlyPayment = loanAmount / loanTerm;
+              } else {
+                monthlyPayment = (loanAmount * interestRate * Math.pow(1 + interestRate, loanTerm)) / (Math.pow(1 + interestRate, loanTerm) - 1);
+              }
+           
+           	  	  if (isNaN(monthlyPayment)) {
+         	monthlyPayment = 0;
+           }
+         
+              const resultsHTML = `<p><strong>Monthly Auto Loan Payment:</strong> $${monthlyPayment.toFixed(2)}</p>`;
+              document.getElementById("results").innerHTML = `${monthlySalary}\n${resultsHTML}\n<p><strong>Total: </strong> $${(monthlyNet - monthlyPayment).toFixed(2)}</p>`;
+            }    
+      </script>
+   </body>
+</html>
